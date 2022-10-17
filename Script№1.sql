@@ -1,3 +1,5 @@
+# ДЗ процессе, это просто проверял Push 
+
 SELECT min(dt) dt_min, max(dt) dt_max
 from history.OrderDetails od 
 limit 100
