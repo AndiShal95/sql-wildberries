@@ -8,7 +8,7 @@
 -- Упорядочить по Кол-ву от большего к меньшему.
 -- Колонки: src_office_id, office_name, qty, position
 
-SELECT src_office_id   - ошибка  SQL Error [1002]
+SELECT src_office_id   
 	, uniq(item_id) qty
 	, dictGet('dictionary.BranchOffice','office_name', src_office_id) src_office_name
 	, position_id
@@ -80,6 +80,7 @@ WHERE src_office_id IN
         SELECT src_office_id
         FROM history.OrderDetails
         WHERE src_office_name = 'Астана' and 'Белая дача'
+	    AND WHERE dt >= now() - INTERVAL 7 DAY
     )
 GROUP BY position, src_office_name, dt_h, qty
 ORDER BY src_office_name, dt_h
