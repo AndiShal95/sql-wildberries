@@ -208,5 +208,5 @@ where src_office_id in
 			AND dt >= now() - interval 2 day
 ORDER BY src_office_id, dt_date 
 LIMIT 5 BY src_office_id, status_id 
-LIMIT 100         ...........................№8 не работает и не успел
+LIMIT 100         ........................№8 не работает и не успел
 
