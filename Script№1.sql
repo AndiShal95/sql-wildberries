@@ -51,3 +51,36 @@ LIMIT 10
 
 
 --03
+-- За 7 дней по офисам оформления src_office_id Астана и Белая дача вывести кол-во qty уникальных заказов за каждый день dt_date.
+-- Использовать справочник имен BranchOffice для вывода имен Офисов office_name.
+-- Для каждого офиса добавить колонку position с любым номером заказа для примера.
+-- Добавить колонку минимальной даты для статуса Резерв.
+-- Добавить колонку минимальной даты для статуса Доставлен.
+-- Добавить колонку максимальной даты для статуса Отмена.
+-- Добавить колонку максимальной даты для статуса Возврат.
+-- Добавить колонку со случайным примером номера заказа для статуса Собран.
+-- Добавить колонку со случайным примером номера заказа для статуса Доставлен.
+-- Упорядочить по офису и по дате.
+-- Колонки: src_office_id, office_name, dt_h, qty, position, min_dt_3, min_dt_16, max_dt_1, max_dt_8, position_25, position_16.
+
+SELECT 
+        dictGet('dictionary.BranchOffice','office_name', src_office_id) src_office_name,
+        toStartOfHour(dt) dt_h,
+        uniq(position_id) qty,
+        position_id as position,
+        minIf(dt, status_id = 3) min_dt_3,
+        minIf(dt, status_id = 16) min_dt_16,
+        maxIf(dt, status_id = 1) max_id_1,
+        maxIf(dt, status_id = 8) max_id_8,
+        anyIf (position_id, status_id = 25) position_25,
+        anyIf(position_id, status_id = 16) position_16
+FROM history.OrderDetails
+WHERE src_office_id IN
+    (
+        SELECT src_office_id
+        FROM history.OrderDetails
+        WHERE src_office_name = 'Астана' and 'Белая дача'
+    )
+GROUP BY position, src_office_name, dt_h, qty
+ORDER BY src_office_name, dt_h
+LIMIT 100
