@@ -30,22 +30,18 @@ LIMIT 100
 -- Колонки: src_office_id, office_name, dt_h, qty, position, dt_min, dt_max
 
 SELECT src_office_id
-	, dictGet('dictionary.BranchOffice','office_name', src_office_id) src_office_name
-	, toStartOfHour(dt) dt_h
-	, uniq(position_id) qty
-	, any(position_id) position
-	, MIN(dt) dt_min
-	, MAX(dt) dt_max
+    , any(position_id) position
+    , uniq(position_id) as qty
+    , dictGet('dictionary.BranchOffice','office_name', src_office_id) src_office_name
+    , toStartOfHour(dt) dt_h
+    , minIf(dt, status_id = 23) dt_min
+    , maxIf(dt, status_id = 23) dt_max
 FROM history.OrderDetails
-WHERE dt >= toStartOfDay(now()) - INTERVAL 2 DAY and src_office_name = 'Электросталь'
-	AND status_id IN
-	(
-		SELECT status_id
-		FROM dictionary.OrderStatus os 
-		WHERE status_name = 'На сборке'
-	)
+WHERE dt >= toStartOfDay(now()) - INTERVAL 2 DAY
+    AND status_id = 23 AND src_office_name = 'Электросталь'
 GROUP BY src_office_id, dt_h
-LIMIT 10
+ORDER BY dt_h
+LIMIT 100
 
 
 --03
