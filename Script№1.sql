@@ -83,6 +83,27 @@ limit 100
 -- Оставить строки, в которых более 40т заказов. Также оставить строки с четными Часами в колонке hour.
 -- Упорядочить по офису и dt_h.
 -- Колонки: src_office_id, office_name, dt_h, qty, hour.
-
 SELECT 
+    src_office_id
+    ,    dictGet('dictionary.BranchOffice','office_name', src_office_id) office_name
+    ,    uniq(position_id) qty
+    ,    toStartOfHour(dt) dt_h
+    ,    toHour(dt) hour
+FROM history.OrderDetails
+WHERE src_office_id = 3480
+    AND dt >= now() - interval 2 day
+    AND hour in(2,4,6,8,10,12,14,16,18,20,22,24)
+GROUP BY dt_h, src_office_id, hour
+HAVING qty > 40000
+ORDER BY src_office_id, dt_h, hour
+LIMIT 100
 
+
+--5
+-- По офису Хабаровск за последние 3 дня посчитать кол-во Доставленных заказов, которые были Оформлены в период между -7 и -3 дня.
+-- Также показать 1 пример заказа в колонке position.
+-- Упорядочить по убыванию кол-ва.
+-- Колонки: src_office_id, office_name, dt_date, qty, position.
+
+SELECT src_office_id
+    , ...
