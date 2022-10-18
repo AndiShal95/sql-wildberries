@@ -65,12 +65,12 @@ SELECT src_office_id
     ,    maxIf(dt, status_id = 8) max_dt_8
     ,    anyIf(position_id, status_id = 25)
     ,    anyIf(position_id, status_id = 16)
-from history.OrderDetails
-where dt >= now() - interval 2 day
-    and src_office_id in [318939, 410475]
-group by dt_date, src_office_id 
-order by src_office_id, dt_date
-limit 100
+FROM history.OrderDetails
+WHERE dt >= now() - interval 2 day
+    AND src_office_id IN [318939, 410475]
+GROUP BY dt_date, src_office_id 
+ORDER BY src_office_id, dt_date
+LIMIT 100
 
 
 
@@ -129,29 +129,27 @@ LIMIT 10
 -- Также показать 1 пример заказа в колонке position.
 -- Упорядочить по убыванию кол-ва.
 -- Колонки: src_office_id, office_name, dt_date, qty, position.
-select 
-	src_office_id
+SELECT src_office_id
 	,	dictGet('dictionary.BranchOffice','office_name', src_office_id) office_name
 	,	toDate(dt) dt_date
 	,	count() qty
 	,	any(position_id) position
-from history.OrderDetails
-where dt >= now() - interval 7 day
-	and src_office_id = 2400
-	and	status_id = 8
-	and src_office_id in
+FROM history.OrderDetails
+WHERE dt >= now() - interval 7 day
+	AND src_office_id = 2400
+	AND	status_id = 8
+	AND src_office_id IN
 	(
-	select 
-	src_office_id
-		from history.OrderDetails
-		where toHour(dt) between 3 and 7
-			and dt >= now() - interval 7 day
-			and status_id = 16
-	limit 100
+		SELECT src_office_id
+		FROM history.OrderDetails
+		WHERE toHour(dt) between 3 and 7
+			AND dt >= now() - interval 7 day
+			AND status_id = 16
+		LIMIT 100
 	)
-group by src_office_id, dt_date 
-order by qty desc
-limit 10
+GROUP BY src_office_id, dt_date 
+ORDER BY qty DESC
+LIMIT 10
 
 
 -- 7 
@@ -159,28 +157,35 @@ limit 10
 -- За 3 дня показать 5 заказов по каждому офису за каждый день по и по каждому статусу из Доставлен, Возвращен.
 -- Для вывода 5 заказов использовать оператор limit 5 by ...
 -- Колонки: src_office_id, office_name, dt_date, position_id, item_id, status_id.
-select 
-	src_office_id
+SELECT src_office_id
 	,	dictGet('dictionary.BranchOffice','office_name', src_office_id) office_name
 	,	toDate(dt) dt_date 
 	,	position_id
 	,	item_id 
 	,	status_id 
-from history.OrderDetails
-	where src_office_id in 
+FROM history.OrderDetails
+WHERE src_office_id IN 
 		(
-		select src_office_id
-		from history.OrderDetails
-		where dt >= now() - interval 3 day 
-			and status_id = 25
-		group by src_office_id
-		having count() between 10000 and 50000
-		order by src_office_id
-		limit 100
+			SELECT src_office_id
+			FROM history.OrderDetails
+			WHERE dt >= now() - interval 3 day AND status_id = 25
+			GROUP BY src_office_id
+			HAVING count() BETWEEN 10000 AND 50000
+			ORDER BY src_office_id
+			LIMIT 100
 		)
-			and status_id in [16, 8]
-			and dt >= now() - interval 2 day
-order by src_office_id, dt_date 
-limit 5 by src_office_id, status_id 
-limit 100
+			AND status_id in [16, 8]
+			AND dt >= now() - interval 2 day
+ORDER BY src_office_id, dt_date 
+LIMIT 5 BY src_office_id, status_id 
+LIMIT 100
+
+
+--8
+-- Для офисов, у которых за 3 дня процент Возвращен к Доставлен в диапазоне 12-14%
+--   вывести такую же информацию как в предыдущей задаче.
+-- За 3 дня показать 5 заказов по каждому офису за каждый день по и по каждому статусу из Доставлен, Возвращен.
+-- Для вывода 5 заказов использовать оператор limit 5 by ...
+-- Колонки: src_office_id, office_name, dt_date, position_id, item_id, status_id.
+
 
