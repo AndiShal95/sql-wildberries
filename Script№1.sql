@@ -29,23 +29,22 @@ LIMIT 100
 -- Упорядочить по колонке dt_h.
 -- Колонки: src_office_id, office_name, dt_h, qty, position, dt_min, dt_max
 
-SELECT position_id
-	, uniq(status_id) qty
+SELECT src_office_id
+	, dictGet('dictionary.BranchOffice','office_name', src_office_id) src_office_name
+	, toStartOfHour(dt) dt_h
+	, uniq(position_id) qty
+	, any(position_id) position
 	, MIN(dt) dt_min
 	, MAX(dt) dt_max
 FROM history.OrderDetails
-WHERE dt >= now() - INTERVAL 2 DAY
-	AND position_id IN
+WHERE dt >= toStartOfDay(now()) - INTERVAL 2 DAY and src_office_name = 'Электросталь'
+	AND status_id IN
 	(
-		SELECT src_office_id
-			, dictGet('dictionary.BranchOffice','office_name', src_office_id) office_name
-			, toStartOfHour(dt) dt_h_
-		FROM history.OrderDetails
-		WHERE dt >= now() - INTERVAL 2 DAY
-		AND office_name = 'Электросталь' AND status_id = 23
-		ORDER BY dt_h_ DESC
+		SELECT status_id
+		FROM dictionary.OrderStatus os 
+		WHERE status_name = 'На сборке'
 	)
-GROUP BY position_id
+GROUP BY src_office_id, dt_h
 LIMIT 10
 
 
