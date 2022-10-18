@@ -85,3 +85,13 @@ WHERE src_office_id IN
 GROUP BY position, src_office_name, dt_h, qty
 ORDER BY src_office_name, dt_h
 LIMIT 100
+
+--04
+-- За 7 дней по офису Екатеринбург вывести кол-во qty уникальных заказов за каждый час.
+-- Добавить колонку hour Час заказа. Например, 14.
+-- Оставить строки, в которых более 40т заказов. Также оставить строки с четными Часами в колонке hour.
+-- Упорядочить по офису и dt_h.
+-- Колонки: src_office_id, office_name, dt_h, qty, hour.
+
+SELECT 
+
