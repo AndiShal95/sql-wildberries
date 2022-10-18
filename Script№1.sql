@@ -187,5 +187,26 @@ LIMIT 100
 -- За 3 дня показать 5 заказов по каждому офису за каждый день по и по каждому статусу из Доставлен, Возвращен.
 -- Для вывода 5 заказов использовать оператор limit 5 by ...
 -- Колонки: src_office_id, office_name, dt_date, position_id, item_id, status_id.
-
+SELECT src_office_id
+	,	dictGet('dictionary.BranchOffice','office_name', src_office_id) office_name
+	,	toDate(dt) dt_date 
+	,	position_id
+	,	item_id 
+	,	status_id 
+from history.OrderDetails
+where src_office_id in
+    (
+       SELECT src_office_id
+			FROM history.OrderDetails
+			WHERE dt >= now() - interval 3 day AND status_id = 25
+			GROUP BY src_office_id
+			HAVING count() BETWEEN 12 AND 14
+			ORDER BY src_office_id
+			LIMIT 100
+    )
+	AND status_id in [16, 8]
+			AND dt >= now() - interval 2 day
+ORDER BY src_office_id, dt_date 
+LIMIT 5 BY src_office_id, status_id 
+LIMIT 100         ...........................№8 не работает и не успел
 
