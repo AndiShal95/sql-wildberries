@@ -8,16 +8,15 @@
 -- Упорядочить по Кол-ву от большего к меньшему.
 -- Колонки: src_office_id, office_name, qty, position
 
-SELECT src_office_id   
-	, uniq(item_id) qty
-	, dictGet('dictionary.BranchOffice','office_name', src_office_id) src_office_name
-	, position_id
+SELECT src_office_id
+    , any(position_id) position
+    , uniq(position_id) as qty
+    , dictGet('dictionary.BranchOffice','office_name', src_office_id) src_office_name
 FROM history.OrderDetails
 WHERE dt >= toStartOfDay(now()) - INTERVAL 2 DAY
-	AND status_id = 18
-GROUP BY position_id
-ORDER BY qty DESC
-LIMIT 20
+    AND status_id = 18
+GROUP BY src_office_id
+LIMIT 100
 
 
 --02
