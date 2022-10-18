@@ -7,7 +7,6 @@
 -- Для каждого офиса добавить колонку position с любым номером заказа для примера.
 -- Упорядочить по Кол-ву от большего к меньшему.
 -- Колонки: src_office_id, office_name, qty, position
-
 SELECT src_office_id
     , any(position_id) position
     , uniq(position_id) as qty
@@ -28,7 +27,6 @@ LIMIT 100
 -- Добавить 2 колонки dt_min dt_max, которые показывают даты первого и последнего статуса в каждом часе.
 -- Упорядочить по колонке dt_h.
 -- Колонки: src_office_id, office_name, dt_h, qty, position, dt_min, dt_max
-
 SELECT src_office_id
     , any(position_id) position
     , uniq(position_id) as qty
@@ -56,7 +54,6 @@ LIMIT 100
 -- Добавить колонку со случайным примером номера заказа для статуса Доставлен.
 -- Упорядочить по офису и по дате.
 -- Колонки: src_office_id, office_name, dt_h, qty, position, min_dt_3, min_dt_16, max_dt_1, max_dt_8, position_25, position_16.
-
 SELECT src_office_id
     ,    dictGet('dictionary.BranchOffice','office_name', src_office_id) src_office_name
     ,    toDate(dt) dt_date 
@@ -104,7 +101,6 @@ LIMIT 100
 -- Также показать 1 пример заказа в колонке position.
 -- Упорядочить по убыванию кол-ва.
 -- Колонки: src_office_id, office_name, dt_date, qty, position.
-
 select src_office_id
 	,	dictGet('dictionary.BranchOffice','office_name', src_office_id) office_name
 	,	toDate(dt) dt_date    
@@ -127,3 +123,65 @@ where dt >= now() - interval 3 day
 group by src_office_id, dt_date
 order by qty desc
 limit 10
+
+
+-- 6
+-- По офису Хабаровск за последние 7 дней посчитать кол-во Возвращенных заказов, которые были доставлены за такой же период.
+-- Также показать 1 пример заказа в колонке position.
+-- Упорядочить по убыванию кол-ва.
+-- Колонки: src_office_id, office_name, dt_date, qty, position.
+select 
+	src_office_id
+	,	dictGet('dictionary.BranchOffice','office_name', src_office_id) office_name
+	,	toDate(dt) dt_date
+	,	count() qty
+	,	any(position_id) position
+from history.OrderDetails
+where dt >= now() - interval 7 day
+	and src_office_id = 2400
+	and	status_id = 8
+	and src_office_id in
+	(
+	select 
+	src_office_id
+		from history.OrderDetails
+		where toHour(dt) between 3 and 7
+			and dt >= now() - interval 7 day
+			and status_id = 16
+	limit 100
+	)
+group by src_office_id, dt_date 
+order by qty desc
+limit 10
+
+
+-- 7 
+-- Для офисов, у которых за 3 дня было между 10т и 50т заказов в статусе Собран, вывести следующую информацию.
+-- За 3 дня показать 5 заказов по каждому офису за каждый день по и по каждому статусу из Доставлен, Возвращен.
+-- Для вывода 5 заказов использовать оператор limit 5 by ...
+-- Колонки: src_office_id, office_name, dt_date, position_id, item_id, status_id.
+select 
+	src_office_id
+	,	dictGet('dictionary.BranchOffice','office_name', src_office_id) office_name
+	,	toDate(dt) dt_date 
+	,	position_id
+	,	item_id 
+	,	status_id 
+from history.OrderDetails
+	where src_office_id in 
+		(
+		select src_office_id
+		from history.OrderDetails
+		where dt >= now() - interval 3 day 
+			and status_id = 25
+		group by src_office_id
+		having count() between 10000 and 50000
+		order by src_office_id
+		limit 100
+		)
+			and status_id in [16, 8]
+			and dt >= now() - interval 2 day
+order by src_office_id, dt_date 
+limit 5 by src_office_id, status_id 
+limit 100
+
