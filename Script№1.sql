@@ -105,5 +105,25 @@ LIMIT 100
 -- Упорядочить по убыванию кол-ва.
 -- Колонки: src_office_id, office_name, dt_date, qty, position.
 
-SELECT src_office_id
-    , ... 
+select src_office_id
+	,	dictGet('dictionary.BranchOffice','office_name', src_office_id) office_name
+	,	toDate(dt) dt_date    
+	,	count() qty
+	,	any(position_id) position
+from history.OrderDetails
+where dt >= now() - interval 3 day
+	and src_office_id = 2400
+	and	status_id = 16
+	and src_office_id in
+	(
+	select 
+	src_office_id
+		from history.OrderDetails
+		where toHour(dt) between 3 and 7
+			and dt >= now() - interval 3 day
+			and status_id = 18
+	limit 100
+	)
+group by src_office_id, dt_date
+order by qty desc
+limit 10
