@@ -57,28 +57,25 @@ LIMIT 100
 -- Упорядочить по офису и по дате.
 -- Колонки: src_office_id, office_name, dt_h, qty, position, min_dt_3, min_dt_16, max_dt_1, max_dt_8, position_25, position_16.
 
-SELECT 
-        dictGet('dictionary.BranchOffice','office_name', src_office_id) src_office_name,
-        toStartOfHour(dt) dt_h,
-        uniq(position_id) qty,
-        position_id as position,
-        minIf(dt, status_id = 3) min_dt_3,
-        minIf(dt, status_id = 16) min_dt_16,
-        maxIf(dt, status_id = 1) max_id_1,
-        maxIf(dt, status_id = 8) max_id_8,
-        anyIf (position_id, status_id = 25) position_25,
-        anyIf(position_id, status_id = 16) position_16
-FROM history.OrderDetails
-WHERE src_office_id IN
-    (
-        SELECT src_office_id
-        FROM history.OrderDetails
-        WHERE src_office_name = 'Астана' and 'Белая дача'
-	    AND WHERE dt >= now() - INTERVAL 7 DAY
-    )
-GROUP BY position, src_office_name, dt_h, qty
-ORDER BY src_office_name, dt_h
-LIMIT 100
+SELECT src_office_id
+    ,    dictGet('dictionary.BranchOffice','office_name', src_office_id) src_office_name
+    ,    toDate(dt) dt_date 
+    ,    count() qty
+    ,    any(position_id) position
+    ,    minIf(dt, status_id = 3) min_dt_3
+    ,    minIf(dt, status_id = 16) min_dt_16
+    ,    maxIf(dt, status_id = 1) max_dt_1
+    ,    maxIf(dt, status_id = 8) max_dt_8
+    ,    anyIf(position_id, status_id = 25)
+    ,    anyIf(position_id, status_id = 16)
+from history.OrderDetails
+where dt >= now() - interval 2 day
+    and src_office_id in [318939, 410475]
+group by dt_date, src_office_id 
+order by src_office_id, dt_date
+limit 100
+
+
 
 --04
 -- За 7 дней по офису Екатеринбург вывести кол-во qty уникальных заказов за каждый час.
