@@ -104,27 +104,28 @@ LIMIT 100
 
 -- Решение не подойдет. Нет проверки position_id на предмет "3 дня посчитать кол-во Доставленных заказов" и "Оформлены в период между -7 и -3 дня".
 -- Заказы position_id должны быть Доставлены "3 дня посчитать кол-во Доставленных заказов" и эти же position_id должны быть ранее заказаны "Оформлены в период между -7 и -3 дня".
-SELECT	src_office_id
-	,	dictGet('dictionary.BranchOffice','office_name', src_office_id) office_name
-	,	toDate(dt) dt_date    
-	,	count() qty
-	,	any(position_id) position
+SELECT
+    src_office_id
+    , dictGet('dictionary.BranchOffice','office_name', src_office_id) office_name
+    , toDate(dt) dt_date
+    , uniq(position_id) qty
+    , any(position_id) position
 FROM history.OrderDetails
-WHERE dt >= now() - interval 3 day
-	AND src_office_id = 2400
-	AND	status_id = 16
-	AND src_office_id IN
-	(
-		SELECT src_office_id
-		FROM history.OrderDetails
-		WHERE toHour(dt) BETWEEN 3 AND 7 -- условие по часу неверное) у нас же дни по задаче
-			AND dt >= now() - interval 3 day
-			AND status_id = 18
-	LIMIT 100 -- лишнее
-	)
-GROUP BY src_office_id, dt_date
+WHERE dt >= now() - INTERVAL 3 DAY
+AND status_id = 16
+AND src_office_id = 2400
+AND position_id in
+    (
+    SELECT 
+    position_id
+        FROM history.OrderDetails
+        where dt between now() - interval 7 day and now() - interval 3 day
+            AND src_office_id = 2400
+            AND status_id = 18
+            )
+GROUP BY dt_date, src_office_id
 ORDER BY qty DESC
-LIMIT 10
+LIMIT 100
 
 
 -- 6
@@ -135,27 +136,27 @@ LIMIT 10
 
 -- Тут аналогично как в задаче 5. Нужно использовать Доставленные position_id. И дня них проверить сколько из них были Возвращены.
 
-SELECT src_office_id
-	,	dictGet('dictionary.BranchOffice','office_name', src_office_id) office_name
-	,	toDate(dt) dt_date
-	,	count() qty -- не та функция. Нужны уникальные заказы. count не подходит.
-	,	any(position_id) position
+SELECT 
+    src_office_id,
+    dictGet('dictionary.BranchOffice','office_name', src_office_id) office_name,
+    toDate(dt) dt_date,
+    uniq(position_id) qty,
+    any(position_id) position
 FROM history.OrderDetails
 WHERE dt >= now() - interval 7 day
-	AND src_office_id = 2400
-	AND	status_id = 8
-	AND src_office_id IN
-	(
-		SELECT src_office_id
-		FROM history.OrderDetails
-		WHERE toHour(dt) between 3 and 7
-			AND dt >= now() - interval 7 day
-			AND status_id = 16
-		LIMIT 100
-	)
-GROUP BY src_office_id, dt_date 
+    AND    status_id = 8
+    AND position_id in
+    (
+    SELECT 
+    position_id
+        FROM history.OrderDetails
+        where dt >= now() - interval 7 day
+            AND src_office_id = 2400
+            AND status_id = 16
+    )
+GROUP BY src_office_id, dt_date
 ORDER BY qty DESC
-LIMIT 10
+LIMIT 100
 
 
 -- 7 
