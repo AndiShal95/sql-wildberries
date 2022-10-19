@@ -89,7 +89,7 @@ SELECT -- в первой строке первая колонка. формат
 FROM history.OrderDetails
 WHERE src_office_id = 3480
     AND dt >= now() - interval 2 day
-    AND hour in(2,4,6,8,10,12,14,16,18,20,22,24) -- нужно использовать функцию остатка от деления на 2.
+    AND hour % 2 = 0 -- нужно использовать функцию остатка от деления на 2. (+)
 GROUP BY dt_h, src_office_id, hour
 HAVING qty > 40000
 ORDER BY src_office_id, dt_h, hour -- hour лишняя
