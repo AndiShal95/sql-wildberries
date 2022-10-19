@@ -179,15 +179,13 @@ WHERE src_office_id IN
 			FROM history.OrderDetails
 			WHERE dt >= now() - interval 3 day AND status_id = 25
 			GROUP BY src_office_id
-			HAVING count() BETWEEN 10000 AND 50000
-			ORDER BY src_office_id -- лишнее
-			LIMIT 100 -- лишнее
+			HAVING count() BETWEEN 10000 AND 50000	
 		)
 			AND status_id in [16, 8] -- круглные скобки
 			AND dt >= now() - interval 2 day
 ORDER BY src_office_id, dt_date 
-LIMIT 5 BY src_office_id, status_id -- 5 заказов по каждому офису за каждый день и по каждому статусу. Не хвататет Даты
-LIMIT 100 -- лишнее
+LIMIT 5 BY src_office_id, dt_date, status_id-- 5 заказов по каждому офису за каждый день и по каждому статусу. Не хвататет Даты (+)
+
 
 
 --8
