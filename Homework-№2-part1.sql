@@ -69,7 +69,7 @@ ALTER TABLE tmp.table106 ADD COLUMN column10 UInt32 AFTER dst_office_id;
 ALTER TABLE tmp.table106 ADD COLUMN column1 UInt32 FIRST;
 
 -- 07 Добавить колонку с типом: для номеров 104-106 Массив строк
-ALTER TABLE tmp.table106 ADD COLUMN column11 String AFTER column10;
+ALTER TABLE tmp.table106 ADD COLUMN arr Array(Tuple(DateTime, String)) materialized array(tuple(dt, position_id))
 
 -- 08 Вставить 3 новые строки с 3мя элементами массива.
 
