@@ -31,3 +31,21 @@ ALTER TABLE tmp.table106 ADD COLUMN dt_last_load Date materialized now()
 
 --02.1 Вставить в таблицу данные, чтобы получилось 10 партиций.
 -- Приложить запрос просмотра системной информации о вашей таблице.
+INSERT INTO tmp.table106
+SELECT dt, position_id, item_id, src_office_id, dst_office_id
+FROM history.OrderDetails
+WHERE dt >= now() - interval 5 day
+    AND item_id > 0
+LIMIT 1000
+
+-- Приложить запрос просмотра системной информации о вашей таблице.
+SELECT path, partition, min_time, max_time, active, marks, rows, round(bytes_on_disk/1024/1024,2) Mb
+    , engine
+FROM system.parts
+WHERE database = 'tmp'
+    AND table = 'table106'
+ORDER BY active, partition, name
+
+
+
+
