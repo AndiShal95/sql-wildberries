@@ -24,5 +24,10 @@ TTL dt + toIntervalDay(7)
 SETTINGS index_granularity = 8192
 
 -- 02 Добавить материализованную колонку dt_date с типом Date, которая будет считать текущую дату от колонки dt.
+ALTER TABLE tmp.table106 ADD COLUMN dt_date Date materialized toDate(dt);
 
+--03 Добавить материализованную колонку dt_last_load, которая будет заполняться текущем временем на момент вставки данных.
+ALTER TABLE tmp.table106 ADD COLUMN dt_last_load Date materialized now()
 
+--02.1 Вставить в таблицу данные, чтобы получилось 10 партиций.
+-- Приложить запрос просмотра системной информации о вашей таблице.
