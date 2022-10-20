@@ -31,10 +31,19 @@ ALTER TABLE tmp.table106 ADD COLUMN dt_last_load Date materialized now()
 
 --02.1 Вставить в таблицу данные, чтобы получилось 10 партиций.
 -- Приложить запрос просмотра системной информации о вашей таблице.
-INSERT INTO tmp.table106(dt, position_id, item_id, src_office_id, dst_office_id)
+INSERT INTO tmp.table106 
+SELECT dt, position_id, item_id, src_office_id, dst_office_id
+from history.OrderDetails 
+where dt <= now() - interval 1 day
+    and item_id > 0
+limit 1000
+
+SELECT * FROM tmp.table106;  -- вставка данных из history.OrderDetails
+
+INSERT INTO tmp.table106(dt, position_id, item_id, src_office_id, dst_office_id)   -- сделал 10 партиций
 VALUES('2022-08-15 18:37:45',1,1,1,1)('2022-08-22 18:37:45',1,1,1,1)('2022-08-29 18:37:45',1,1,1,1)
 	('2022-09-05 18:37:45',1,1,1,1)('2022-09-12 18:37:45',1,1,1,1)('2022-09-19 18:37:45',1,1,1,1)('2022-09-26 18:37:45',1,1,1,1)
-	('2022-10-03 18:37:45',1,1,1,1)('2022-10-10 18:37:45',1,1,1,1)('2022-10-17 18:37:45',1,1,1,1)   -- сделал частично, а если надо 100?
+	('2022-10-03 18:37:45',1,1,1,1)('2022-10-10 18:37:45',1,1,1,1)('2022-10-17 18:37:45',1,1,1,1)   
 
 -- Приложить запрос просмотра системной информации о вашей таблице.
 SELECT path, partition, min_time, max_time, active, marks, rows, round(bytes_on_disk/1024/1024,2) Mb
