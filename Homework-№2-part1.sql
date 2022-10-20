@@ -59,7 +59,19 @@ ALTER TABLE tmp.table106 DROP PARTITION '2022-10-03';
 ALTER TABLE tmp.table106 DROP PARTITION '2022-09-26'
 
 -- 04 Удалить данные в крайней старшей партиции через мутацию.
+ALTER TABLE tmp.table106 DELETE IN PARTITION '2022-08-15'; -- это просто данные из таблицы удалил 
+ALTER TABLE tmp.table106 DELETE IN PARTITION '2022-08-15'; -- такой запрос не работает
 
+-- 05 Добавить колонку column10 в конец таблицы.
+ALTER TABLE tmp.table106 ADD COLUMN column10 UInt32 AFTER dst_office_id;
+
+-- 06 Добавить колонку column1 в начало таблицы.
+ALTER TABLE tmp.table106 ADD COLUMN column1 UInt32 FIRST;
+
+-- 07 Добавить колонку с типом: для номеров 104-106 Массив строк
+ALTER TABLE tmp.table106 ADD COLUMN column11 String AFTER column10;
+
+-- 08 Вставить 3 новые строки с 3мя элементами массива.
 
 
 
