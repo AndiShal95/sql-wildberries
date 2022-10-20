@@ -195,28 +195,24 @@ LIMIT 5 BY src_office_id, dt_date, status_id-- 5 заказов по каждо�
 -- За 3 дня показать 5 заказов по каждому офису за каждый день по и по каждому статусу из Доставлен, Возвращен.
 -- Для вывода 5 заказов использовать оператор limit 5 by ...
 -- Колонки: src_office_id, office_name, dt_date, position_id, item_id, status_id.
-SELECT src_office_id
-	,	dictGet('dictionary.BranchOffice','office_name', src_office_id) office_name
-	,	toDate(dt) dt_date 
-	,	position_id
-	,	item_id 
-	,	status_id 
-from history.OrderDetails
-where src_office_id in
+SELECT 
+    src_office_id
+    ,    dictGet('dictionary.BranchOffice','office_name', src_office_id) office_name
+    ,    toDate(dt) dt_date 
+    ,    position_id
+    ,    item_id 
+    ,    status_id 
+FROM history.OrderDetails
+WHERE src_office_id IN
     (
-       SELECT src_office_id
-			FROM history.OrderDetails
-			WHERE dt >= now() - interval 3 day AND status_id = 25
-			GROUP BY src_office_id
-			HAVING count() BETWEEN 12 AND 14 -- тут нужно посчитать процент сежду статусами 8 и 16
-			ORDER BY src_office_id -- лишнее, возможно поэтому и не отрабатывает
-			LIMIT 100 -- лишнее
+    SELECT src_office_id
+    FROM history.OrderDetails
+    WHERE  dt >= now() - INTERVAL 3 DAY
+    GROUP BY src_office_id
+    HAVING uniqIf(position_id, status_id=8 )/ uniqIf(position_id, status_id=16)*100 BETWEEN 12 AND 14
     )
-	AND status_id in [16, 8] -- круглые скобки
-			AND dt >= now() - interval 2 day -- форматирование
+    AND status_id IN (16, 8)
+    AND dt >= now() - INTERVAL 3 DAY 
 ORDER BY src_office_id, dt_date 
-LIMIT 5 BY src_office_id, status_id -- 5 заказов по каждому офису за каждый день по и по каждому статусу. Не хвататет даты.
-LIMIT 100 -- лишнее
-
--- ........................№8 не работает и не успел
+LIMIT 5 by src_office_id, dt_date, status_id
 
