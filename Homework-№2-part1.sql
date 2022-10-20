@@ -45,6 +45,13 @@ WHERE database = 'tmp'
 ORDER BY active, partition, name
 
 -- 03 Удалить 3 последние партиции.
+ALTER TABLE tmp.table106 DROP PARTITION '2022-10-10';
+ALTER TABLE tmp.table106 DROP PARTITION '2022-10-03';
+ALTER TABLE tmp.table106 DROP PARTITION '2022-09-26'
+
+-- 04 Удалить данные в крайней старшей партиции через мутацию.
+
+
 
 
 
