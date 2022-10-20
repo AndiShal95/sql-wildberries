@@ -46,6 +46,7 @@ WHERE database = 'tmp'
     AND table = 'table106'
 ORDER BY active, partition, name
 
+-- 03 Удалить 3 последние партиции.
 
 
 
