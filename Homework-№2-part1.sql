@@ -99,7 +99,28 @@ ALTER TABLE tmp.table106 DROP COLUMN dst_office_id;
 
 -- 14 Создать еще одну таблицу tmp.table2_10_ со структурой, которую мы получили в предыдущих шагах.
 -- При создании таблицы сделать TTL:  для номеров 104-106 1 неделя
+CREATE TABLE tmp.table2_106
+(
+    `column1` UInt32,
+    `dt` DateTime,
+    `position_id` UInt64,
+    `item_id` UInt64,
+    `src_office_id` UInt32,
+    `column10` UInt32,
+    `arr2` String,
+    `dt_date` Date MATERIALIZED toDate(dt),
+    `dt_last_load` Date MATERIALIZED now(),
+    `arr3` Array(Tuple(DateTime, String)),
+    `arr11` Array(Tuple(DateTime, UInt64)) MATERIALIZED [(dt, position_id)]
+)
+ENGINE = MergeTree
+PARTITION BY toStartOfWeek(dt, 1)
+ORDER BY (src_office_id, position_id)
+TTL toStartOfDay(dt) + interval 7 day
+SETTINGS index_granularity = 8192
+
+-- 15 Залить данные из первой таблицы во вторую.
 
 
-
+-- 16 Добавить код запроса просмотра системной информации своей таблицы.
 
