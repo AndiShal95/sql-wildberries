@@ -82,7 +82,7 @@ INSERT INTO tmp.table106(arr2) VALUES ('{"892ql", "p2", "dat", "plade"}');
 ALTER TABLE tmp.table106 ADD COLUMN arr3 Array(Tuple(DateTime, String));
 
 -- 10 Вставить 3 новые строки с 3мя элементами массива.
-INSERT INTO tmp.table106(arr3) VALUES
+INSERT INTO tmp.table106(arr3) VALUES({"1970-01-01 03:00:00", "postgres"}) -- не работает
 				       
 -- 11 Добавить материализованную колонку массив, чтобы она заполнялась из колонок dt, position_id.
 			 
