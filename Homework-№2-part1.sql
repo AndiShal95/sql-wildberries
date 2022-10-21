@@ -18,7 +18,7 @@ CREATE TABLE tmp.table106
     `dst_office_id` UInt32
 )
 ENGINE = MergeTree
-PARTITION BY toStartOfWeek(dt, 1)
+PARTITION BY toStartOfWeek(dt, 1) 
 ORDER BY (src_office_id, position_id)
 SETTINGS index_granularity = 8192
 
