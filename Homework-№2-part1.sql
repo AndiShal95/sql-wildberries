@@ -89,8 +89,10 @@ INSERT INTO tmp.table106(arr3) VALUES([(now(),'42343678'),(now(),'483wo'),(now()
 -- 11 Добавить материализованную колонку массив, чтобы она заполнялась из колонок dt, position_id.
 ALTER TABLE tmp.table106 ADD COLUMN arr11 Array(Tuple(DateTime, UInt64)) materialized array(tuple(dt, position_id));
 
--- 12 Вставить 3 новые строки.
---Куда, в материализованную колонку?
+-- 12 Вставить 3 простые строки со значениями в таблицу
+INSERT INTO tmp.table106(column1, dt, position_id, column10) VALUES('2', '1970-01-01 03:00:00', '60056', '5');
+INSERT INTO tmp.table106(column1, dt, position_id, column10) VALUES('3', '1980-01-01 03:00:00', '60057', '6');
+INSERT INTO tmp.table106(column1, dt, position_id, column10) VALUES('4', '1990-01-01 03:00:00', '60058', '7');
 
 -- 13 Удалить колонку dst_office_id.
 ALTER TABLE tmp.table106 DROP COLUMN dst_office_id;
