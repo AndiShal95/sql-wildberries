@@ -20,7 +20,6 @@ CREATE TABLE tmp.table106
 ENGINE = MergeTree
 PARTITION BY toStartOfWeek(dt, 1)
 ORDER BY (src_office_id, position_id)
-TTL dt + toIntervalDay(7)
 SETTINGS index_granularity = 8192
 
 -- 02 Добавить материализованную колонку dt_date с типом Date, которая будет считать текущую дату от колонки dt.
