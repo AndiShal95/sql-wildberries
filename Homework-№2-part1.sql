@@ -85,8 +85,16 @@ ALTER TABLE tmp.table106 ADD COLUMN arr3 Array(Tuple(DateTime, String));
 INSERT INTO tmp.table106(arr3) VALUES({"1970-01-01 03:00:00", "postgres"}) -- не работает
 				       
 -- 11 Добавить материализованную колонку массив, чтобы она заполнялась из колонок dt, position_id.
-			 
-			 
+ALTER TABLE tmp.table106 ADD COLUMN arr11 Array(Tuple(DateTime, UInt64)) materialized array(tuple(dt, position_id));
+
+-- 12 Вставить 3 новые строки.
+--Куда, в материализованную колонку?
+
+-- 13 Удалить колонку dst_office_id.
+ALTER TABLE tmp.table106 DROP COLUMN dst_office_id;
+
+-- 14 Создать еще одну таблицу tmp.table2_10_ со структурой, которую мы получили в предыдущих шагах.
+-- При создании таблицы сделать TTL:  для номеров 104-106 1 неделя
 
 
 
