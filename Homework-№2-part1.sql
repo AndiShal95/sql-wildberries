@@ -79,6 +79,7 @@ INSERT INTO tmp.table106(arr2) VALUES ('{"123", "YOHOHO", "BEbebe", "Lala"}');
 INSERT INTO tmp.table106(arr2) VALUES ('{"892ql", "p2", "dat", "plade"}');
 
 -- 09 Добавить колонку с типом для номеров 104-106 Массив последовательности (DateTime, String).
+ALTER TABLE tmp.table106 ADD COLUMN arr3 Array(Tuple(DateTime, String));
 
-
+-- 10 Вставить 3 новые строки с 3мя элементами массива.
 
