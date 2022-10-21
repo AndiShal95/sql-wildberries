@@ -149,4 +149,17 @@ ORDER BY partition, name
 --
 -- Почему у некоторых заказов diff_h более 48 или менее 48 часов. Написать словами почему так произошло.
 -- Попробуйте написать доп условия в запрос, чтобы это избежать.
-
+SELECT src_office_id
+	, position_id position
+	, minIf(toStartOfHour(dt), status_id = 18) min_dt_18
+	, minIf(dt, status_id = 23) min_dt_23
+	, maxIf(dt, status_id = 27) max_dt_27
+	, min_dt_23 - max_dt_27 as diff_h
+	, uniq(item_id) qty
+	, arraySort(groupArray((dt, status_id))) arr_dt_st
+FROM history.OrderDetails
+WHERE dt >= now() - interval 1 day
+	AND src_office_id = 2400 AND status_id = 18
+GROUP BY src_office_id, position
+ORDER BY diff_h DESC
+LIMIT 100
