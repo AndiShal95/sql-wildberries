@@ -120,7 +120,18 @@ TTL toStartOfDay(dt) + interval 7 day
 SETTINGS index_granularity = 8192
 
 -- 15 Залить данные из первой таблицы во вторую.
-
+INSERT INTO tmp.table2_106 SELECT column1, dt, position_id, item_id, src_office_id, 
+column10, arr2, arr3
+FROM tmp.table106
+LIMIT 150
 
 -- 16 Добавить код запроса просмотра системной информации своей таблицы.
+SELECT path, partition, name, min_time, max_time, active, marks, rows
+    , round(bytes_on_disk/1024/1024,2) Mb
+    , engine
+FROM system.parts
+WHERE database = 'tmp'
+    and table = 'table2_106'
+ORDER BY partition, name
+
 
