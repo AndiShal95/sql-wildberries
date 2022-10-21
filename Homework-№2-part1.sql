@@ -70,9 +70,15 @@ ALTER TABLE tmp.table106 ADD COLUMN column1 UInt32 FIRST;
 
 -- 07 Добавить колонку с типом: для номеров 104-106 Массив строк
 ALTER TABLE tmp.table106 ADD COLUMN arr Array(Tuple(DateTime, String)) materialized array(tuple(dt, position_id))
+-- или другой вариант, не понял что именно надо
+ALTER TABLE tmp.table106 ADD COLUMN arr2 TEXT after column10
 
 -- 08 Вставить 3 новые строки с 3мя элементами массива.
+INSERT INTO tmp.table106(arr2) VALUES ('{"sql", "postgres", "database", "plsql"}');
+INSERT INTO tmp.table106(arr2) VALUES ('{"123", "YOHOHO", "BEbebe", "Lala"}');
+INSERT INTO tmp.table106(arr2) VALUES ('{"892ql", "p2", "dat", "plade"}');
 
+-- 09 Добавить колонку с типом для номеров 104-106 Массив последовательности (DateTime, String).
 
 
 
