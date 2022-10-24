@@ -144,14 +144,13 @@ SELECT src_office_id
 	, minIf(toStartOfHour(dt), status_id = 18) min_dt_18
 	, minIf(dt, status_id = 23) min_dt_23
 	, maxIf(dt, status_id = 27) max_dt_27
-	, min_dt_23 - max_dt_27 as diff_h -- перепиши на функцию date_diff
+	, date_diff('hour', max_dt_27, min_dt_23) as diff_h -- перепиши на функцию date_diff (+)
 	, uniq(item_id) qty
 	, arraySort(groupArray((dt, status_id))) arr_dt_st
 FROM history.OrderDetails
 WHERE dt >= now() - interval 1 day
 	AND src_office_id = 2400
-    AND status_id = 18 -- это лишнее. потому что нам важны еще другие статусы 23 и 27
 GROUP BY src_office_id, position
--- having добавь условия для фильтрации min_dt_23 и max_dt_27, чтобы выполнить полностью это задание.
-ORDER BY diff_h DESC
-LIMIT 100
+HAVING diff_h > -48 AND diff_h < 48   -- having добавь условия для фильтрации min_dt_23 и max_dt_27, чтобы выполнить полностью это задание(+/-)-?
+ORDER BY diff_h
+LIMIT 100;
