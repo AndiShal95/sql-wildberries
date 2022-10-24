@@ -9,6 +9,7 @@
 --     `item_id`       UInt64
 --     `src_office_id` UInt32
 --     `dst_office_id` UInt32
+drop TABLE tmp.table106;
 CREATE TABLE tmp.table106
 (
     `dt` DateTime,
@@ -18,7 +19,7 @@ CREATE TABLE tmp.table106
     `dst_office_id` UInt32
 )
 ENGINE = MergeTree
-PARTITION BY toStartOfWeek(dt, 1) 
+PARTITION BY toStartOfWeek(dt, 1)  -- Если не знаешь, что означает 1, то не пиши)
 ORDER BY (src_office_id, position_id)
 SETTINGS index_granularity = 8192
 
@@ -32,7 +33,7 @@ ALTER TABLE tmp.table106 ADD COLUMN dt_last_load Date materialized now()
 INSERT INTO tmp.table106(dt, position_id, item_id, src_office_id, dst_office_id)   -- сделал 10 партиций
 VALUES('2022-08-15 18:37:45',1,1,1,1)('2022-08-22 18:37:45',1,1,1,1)('2022-08-29 18:37:45',1,1,1,1)
 	('2022-09-05 18:37:45',1,1,1,1)('2022-09-12 18:37:45',1,1,1,1)('2022-09-19 18:37:45',1,1,1,1)('2022-09-26 18:37:45',1,1,1,1)
-	('2022-10-03 18:37:45',1,1,1,1)('2022-10-10 18:37:45',1,1,1,1)('2022-10-17 18:37:45',1,1,1,1)   
+	('2022-10-03 18:37:45',1,1,1,1)('2022-10-10 18:37:45',1,1,1,1)('2022-10-17 18:37:45',1,1,1,1);
 
 -- Приложить запрос просмотра системной информации о вашей таблице.
 SELECT path, partition, min_time, max_time, active, marks, rows, round(bytes_on_disk/1024/1024,2) Mb
@@ -48,6 +49,7 @@ ALTER TABLE tmp.table106 DROP PARTITION '2022-10-03';
 ALTER TABLE tmp.table106 DROP PARTITION '2022-09-26'
 
 -- 04 Удалить данные в крайней старшей партиции через мутацию.
+-- Думаю надо переделать. Правильный синтаксис alter table tmp.table101 delete where dt >= '2022-10-22 00:00:00'
 ALTER TABLE tmp.table106 DELETE IN PARTITION '2022-08-15'; -- это просто данные из таблицы удалил 
 ALTER TABLE tmp.table106 DELETE IN PARTITION '2022-08-15'; -- такой запрос не работает
 
@@ -58,9 +60,9 @@ ALTER TABLE tmp.table106 ADD COLUMN column10 UInt32 AFTER dst_office_id;
 ALTER TABLE tmp.table106 ADD COLUMN column1 UInt32 FIRST;
 
 -- 07 Добавить колонку с типом: для номеров 104-106 Массив строк
-ALTER TABLE tmp.table106 ADD COLUMN arr Array(Tuple(DateTime, String)) materialized array(tuple(dt, position_id))
+ALTER TABLE tmp.table106 ADD COLUMN arr Array(Tuple(DateTime, String)) materialized array(tuple(dt, position_id)) -- это не отсуюда. удали)
 -- или другой вариант, не понял что именно надо
-ALTER TABLE tmp.table106 ADD COLUMN arr2 TEXT after column10
+ALTER TABLE tmp.table106 ADD COLUMN arr2 TEXT after column10 -- Array(String)
 
 -- 08 Вставить 3 новые строки с 3мя элементами массива.
 INSERT INTO tmp.table106(arr2) VALUES ('{"sql", "postgres", "database", "plsql"}');
@@ -88,6 +90,7 @@ ALTER TABLE tmp.table106 DROP COLUMN dst_office_id;
 
 -- 14 Создать еще одну таблицу tmp.table2_10_ со структурой, которую мы получили в предыдущих шагах.
 -- При создании таблицы сделать TTL:  для номеров 104-106 1 неделя
+drop TABLE tmp.table2_106
 CREATE TABLE tmp.table2_106
 (
     `column1` UInt32,
@@ -143,12 +146,14 @@ SELECT src_office_id
 	, minIf(toStartOfHour(dt), status_id = 18) min_dt_18
 	, minIf(dt, status_id = 23) min_dt_23
 	, maxIf(dt, status_id = 27) max_dt_27
-	, min_dt_23 - max_dt_27 as diff_h
+	, min_dt_23 - max_dt_27 as diff_h -- перепиши на функцию date_diff
 	, uniq(item_id) qty
 	, arraySort(groupArray((dt, status_id))) arr_dt_st
 FROM history.OrderDetails
 WHERE dt >= now() - interval 1 day
-	AND src_office_id = 2400 AND status_id = 18
+	AND src_office_id = 2400
+    AND status_id = 18 -- это лишнее. потому что нам важны еще другие статусы 23 и 27
 GROUP BY src_office_id, position
+-- having добавь условия для фильтрации min_dt_23 и max_dt_27, чтобы выполнить полностью это задание.
 ORDER BY diff_h DESC
 LIMIT 100
