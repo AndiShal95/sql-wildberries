@@ -104,7 +104,7 @@ CREATE TABLE tmp.table2_106
     `arr11` Array(Tuple(DateTime, UInt64)) MATERIALIZED [(dt, position_id)]
 )
 ENGINE = MergeTree
-PARTITION BY toStartOfWeek(dt, 1)
+PARTITION BY toStartOfWeek(dt)
 ORDER BY (src_office_id, position_id)
 TTL toStartOfDay(dt) + interval 7 day
 SETTINGS index_granularity = 8192
