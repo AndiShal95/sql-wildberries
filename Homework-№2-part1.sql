@@ -19,7 +19,7 @@ CREATE TABLE tmp.table106
     `dst_office_id` UInt32
 )
 ENGINE = MergeTree
-PARTITION BY toStartOfWeek(dt, 1)  -- Если не знаешь, что означает 1, то не пиши)
+PARTITION BY toStartOfWeek(dt)  -- Если не знаешь, что означает 1, то не пиши) (+)
 ORDER BY (src_office_id, position_id)
 SETTINGS index_granularity = 8192
 
@@ -50,8 +50,8 @@ ALTER TABLE tmp.table106 DROP PARTITION '2022-09-26'
 
 -- 04 Удалить данные в крайней старшей партиции через мутацию.
 -- Думаю надо переделать. Правильный синтаксис alter table tmp.table101 delete where dt >= '2022-10-22 00:00:00'
-ALTER TABLE tmp.table106 DELETE IN PARTITION '2022-08-15'; -- это просто данные из таблицы удалил 
-ALTER TABLE tmp.table106 DELETE IN PARTITION '2022-08-15'; -- такой запрос не работает
+ALTER TABLE tmp.table106 DELETE WHERE dt >= '2022-10-15 00:00:00' -- удаление данных из таблицы
+					--(был застой: смотрел в запросе системной информации партиции увеличиваются)
 
 -- 05 Добавить колонку column10 в конец таблицы.
 ALTER TABLE tmp.table106 ADD COLUMN column10 UInt32 AFTER dst_office_id;
@@ -60,14 +60,12 @@ ALTER TABLE tmp.table106 ADD COLUMN column10 UInt32 AFTER dst_office_id;
 ALTER TABLE tmp.table106 ADD COLUMN column1 UInt32 FIRST;
 
 -- 07 Добавить колонку с типом: для номеров 104-106 Массив строк
-ALTER TABLE tmp.table106 ADD COLUMN arr Array(Tuple(DateTime, String)) materialized array(tuple(dt, position_id)) -- это не отсуюда. удали)
--- или другой вариант, не понял что именно надо
-ALTER TABLE tmp.table106 ADD COLUMN arr2 TEXT after column10 -- Array(String)
+ALTER TABLE tmp.table106 ADD COLUMN arr2 Array(String) AFTER column10; -- Array(String) (+)
 
 -- 08 Вставить 3 новые строки с 3мя элементами массива.
-INSERT INTO tmp.table106(arr2) VALUES ('{"sql", "postgres", "database", "plsql"}');
-INSERT INTO tmp.table106(arr2) VALUES ('{"123", "YOHOHO", "BEbebe", "Lala"}');
-INSERT INTO tmp.table106(arr2) VALUES ('{"892ql", "p2", "dat", "plade"}');
+INSERT INTO tmp.table106(arr2) VALUES([('Bronto'),('Pagani'),('Audi')]);
+INSERT INTO tmp.table106(arr2) VALUES([('Lada'),('Largus'),('Borjomi')]);
+INSERT INTO tmp.table106(arr2) VALUES ([('Tesla'), ('Plaid'), ('Goodcar')])
 
 -- 09 Добавить колонку с типом для номеров 104-106 Массив последовательности (DateTime, String).
 ALTER TABLE tmp.table106 ADD COLUMN arr3 Array(Tuple(DateTime, String));
@@ -90,7 +88,7 @@ ALTER TABLE tmp.table106 DROP COLUMN dst_office_id;
 
 -- 14 Создать еще одну таблицу tmp.table2_10_ со структурой, которую мы получили в предыдущих шагах.
 -- При создании таблицы сделать TTL:  для номеров 104-106 1 неделя
-drop TABLE tmp.table2_106
+drop TABLE if exists tmp.table2_106
 CREATE TABLE tmp.table2_106
 (
     `column1` UInt32,
