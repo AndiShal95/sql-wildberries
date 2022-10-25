@@ -201,5 +201,53 @@ SELECT log_id, position_id, dt, item_id, status_id, src_office_id, dst_office_id
 FROM tmp.table3_106;
 
 
+-- 13 Вывести данные по выбранному заказу, который использовали в предыдущих запросах.
+SELECT * FROM tmp.table5_106
+WHERE position_id = 600682328418
+ORDER BY dt;
+
+
+-- 14 Попытаться удалить дубли через команду optimize.
+-- Почему дубли не удаляются. Написать словами.
+optimize table tmp.table5_106 final; 
+ --Если делаю 2 INSERT вместо одного(из 12-го задания), то дубль удаляется
+ 
+ 
+ -- 15 Получить последнее состояние заказа. Применить функцию argMax() по log_id.
+SELECT argMax((log_id, position_id, dt, item_id, status_id, src_office_id, dst_office_id
+		, delivery_dt, is_marketplace, as_id, dt_date), log_id)
+FROM tmp.table4_106
+WHERE position_id = 600682328418;
+
+
+-- 16 Сделать новую таблицу tmp.table6_106 с сортировкой по position_id, dt_date.
+-- Партиционирование по одному месяцу.
+-- Движок ReplacingMergeTree.
+-- Залить в нее все данные из тестового набора дынных один раз.
+CREATE TABLE tmp.table6_106
+(
+  log_id         UInt64,
+  position_id    UInt64,
+  dt             DateTime,
+  item_id        UInt64,
+  status_id      UInt64,
+  src_office_id  UInt32,
+  dst_office_id  UInt32,
+  delivery_dt    DateTime,
+  is_marketplace UInt8,
+  as_id          UInt64,
+  dt_date        Date
+)
+ENGINE = ReplacingMergeTree
+PARTITION BY toStartOfMonth(dt)
+ORDER BY (position_id, dt_date)
+SETTINGS index_granularity = 8192;
+--------------------
+INSERT INTO tmp.table6_106
+SELECT log_id, position_id, dt, item_id, status_id, src_office_id, dst_office_id
+		, delivery_dt, is_marketplace, as_id, dt_date
+FROM tmp.table3_106;
+
+
 
 
