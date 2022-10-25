@@ -73,9 +73,9 @@ SELECT position_id
 FROM tmp.table3_106
 WHERE status_id IN 
 ( 
-	SELECT status_id 
-	FROM tmp.table3_106
-	WHERE status_id = 8
+  SELECT status_id 
+  FROM tmp.table3_106
+  WHERE status_id = 8
 )
 GROUP BY position_id
 ORDER BY uniq(status_id) DESC
@@ -119,4 +119,38 @@ INSERT INTO tmp.table4_106
 SELECT log_id, position_id, dt, item_id, status_id, src_office_id, dst_office_id
 		, delivery_dt, is_marketplace, as_id, dt_date
 FROM tmp.table3_106;
+
+
+-- 07 Найти заказы, которые встречаются в таблице более 1го раза.
+SELECT dt_date, dt, position_id, item_id
+     , status_id
+     , dictGet('dictionary.OrderStatus','status_name',status_id) status_name
+     , src_office_id
+FROM tmp.table4_106 final
+ORDER BY dt
+LIMIT 100
+
+
+-- 08 Вывести один из таких заказов.
+SELECT dt_date, dt, position_id, item_id
+     , status_id
+     , dictGet('dictionary.OrderStatus','status_name',status_id) status_name
+     , src_office_id
+FROM tmp.table4_106
+WHERE position_id = 600682328418
+ORDER BY dt;
+
+
+-- 09 Применить ключевое слово final для удаления дублей из результата.
+optimize table tmp.table4_106 final;
+
+
+-- 10 Вместо final применить функцию argMax, чтобы удалить дубли.
+-- На данном шаге применить argMax к каждой колонке.
+-- В функции вместо даты использовать колонку log_id.
+-- в первой лекции была информация, что log_id это номер изменения.
+
+
+
+
 
