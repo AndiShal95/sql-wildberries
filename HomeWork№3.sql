@@ -1,4 +1,5 @@
-SHOW CREATE TABLE tmp.table106;
+-- ДЗ №3
+-- Создать таблицу с такой структурой колонок. tmp.table3_106
 
 CREATE TABLE tmp.table3_106
 (
@@ -36,9 +37,10 @@ WHERE dt >= toStartOfDay(now()) - INTERVAL 3 DAY
 AND src_office_id = 2400 AND status_id != 1
 LIMIT 200000;
 
-SELECT COUNT(log_id) FROM tmp.table3_106;
+SELECT COUNT(log_id) FROM tmp.table3_106;  --до 1млн строк
 
 -- 02 Провести исследование отобранного набора данных.
+-- Сколько уникальных заказов есть в тестовой выборке.
 SELECT uniq(position_id) as qty FROM tmp.table3_106;
 
 -- 03 Сколько заказов было Оформлено, Собрано, Подготовлено к отгрузке, Доставлено, Возврещено.
