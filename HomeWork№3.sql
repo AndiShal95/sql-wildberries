@@ -36,12 +36,13 @@ FROM history.OrderDetails
 WHERE dt >= toStartOfDay(now()) - INTERVAL 3 DAY
 AND src_office_id = 2400 AND status_id != 1
 LIMIT 200000;
+SELECT COUNT(log_id) FROM tmp.table3_106;  --стало 1млн строк
 
-SELECT COUNT(log_id) FROM tmp.table3_106;  --до 1млн строк
 
 -- 02 Провести исследование отобранного набора данных.
 -- Сколько уникальных заказов есть в тестовой выборке.
 SELECT uniq(position_id) as qty FROM tmp.table3_106;
+
 
 -- 03 Сколько заказов было Оформлено, Собрано, Подготовлено к отгрузке, Доставлено, Возврещено.
 SELECT countIf(status_id, status_id = 18) qty_18_status
