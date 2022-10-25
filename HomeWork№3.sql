@@ -249,5 +249,10 @@ SELECT log_id, position_id, dt, item_id, status_id, src_office_id, dst_office_id
 FROM tmp.table3_106;
 
 
-
-
+-- 17 Получить последние данные по всем залитым заказам. Применить argMax()
+SELECT position_id
+     , argMax((log_id, position_id, dt, item_id, status_id, src_office_id, dst_office_id
+		, delivery_dt, is_marketplace, as_id, dt_date), dt) status_last
+FROM tmp.table6_106
+GROUP BY position_id
+ORDER BY position_id;
