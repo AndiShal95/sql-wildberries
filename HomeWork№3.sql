@@ -54,19 +54,40 @@ FROM tmp.table3_106;
 
 -- 04 Вывести 100 заказов, с наибольшей историей.
 -- Добавить колонку массив со всеми товарами, которые были в заказе. Убрать дубли в массиве.
-SELECT position_id, status_id
-FROM tmp.table3_106              ----- ДОДЕЛАЙ!!!!
-WHERE status_id IN     
+SELECT position_id
+    , uniq(status_id)
+    , arraySort(arrayDistinct(groupArray(item_id))) arr_item -- массив уникальных товаров в заказе
+FROM tmp.table3_106
+GROUP BY position_id
+ORDER BY uniq(status_id) DESC
+LIMIT 100;
 
 
 -- 05 Из предыдущего полученного результата выбрать один заказ с максимальным кол-вом истории и
 -- у которого была хотя бы одна замена товара в заказе.
 -- За 7 дней из таблицы history.OrderDetails вывести детализацию по этому заказу.
 -- Упорядочить по дате.
+SELECT position_id
+    , uniq(status_id)
+    , arraySort(arrayDistinct(groupArray(item_id))) arr_item -- массив уникальных товаров в заказе
+FROM tmp.table3_106
+WHERE status_id IN 
+( 
+	SELECT status_id 
+	FROM tmp.table3_106
+	WHERE status_id = 8
+)
+GROUP BY position_id
+ORDER BY uniq(status_id) DESC
+LIMIT 1;
 
- ----- ДОДЕЛАЙ!!!!
-
-
+--Детализация по заказу из предыдущего запроса
+SELECT log_id, position_id, dt, item_id, status_id, src_office_id, dst_office_id
+		, delivery_dt, is_marketplace, as_id, dt_date
+FROM history.OrderDetails od 
+WHERE dt >= toStartOfDay(now()) - INTERVAL 7 DAY
+AND position_id = 600703394373
+ORDER BY dt;
 
 
 -- 06 Сделать таблицу с движком ReplacingMergeTree. tmp.table4_115
