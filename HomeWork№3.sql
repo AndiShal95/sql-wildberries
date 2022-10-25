@@ -149,7 +149,56 @@ optimize table tmp.table4_106 final;
 -- На данном шаге применить argMax к каждой колонке.
 -- В функции вместо даты использовать колонку log_id.
 -- в первой лекции была информация, что log_id это номер изменения.
+SELECT argMax((log_id, position_id, dt, item_id, status_id, src_office_id, dst_office_id
+		, delivery_dt, is_marketplace, as_id, dt_date), log_id)
+FROM tmp.table4_106;
 
+
+-- 11 Применить функцию argMax чтобы удалить дубли.
+-- На данном шаге применить argMax к Tuple.
+-- В функции вместо даты использовать колонку log_id.
+-- Вывести все колонки.
+SELECT position_id
+    , t_max.1 dt_max
+    , t_max.2 item_last
+FROM 
+(
+  SELECT position_id, argMax((log_id, position_id, dt, item_id, status_id, src_office_id, dst_office_id
+		, delivery_dt, is_marketplace, as_id, dt_date), log_id) t_max
+  FROM tmp.table4_106
+  WHERE position_id = 600682328418
+  GROUP BY position_id
+);
+
+
+-- 12 Сделать новую таблицу tmp.table5_106 с сортировкой по position_id.
+-- Партиционирвоание по dt_date. Функция партиционирования toDate.
+-- Движок ReplacingMergeTree. Сортировка position_id.
+-- Залить в нее все данные из тестового набора дынных один раз.
+CREATE TABLE tmp.table5_106
+(
+  log_id         UInt64,
+  position_id    UInt64,
+  dt             DateTime,
+  item_id        UInt64,
+  status_id      UInt64,
+  src_office_id  UInt32,
+  dst_office_id  UInt32,
+  delivery_dt    DateTime,
+  is_marketplace UInt8,
+  as_id          UInt64,
+  dt_date        Date
+)
+ENGINE = ReplacingMergeTree
+PARTITION BY toDate(dt_date)
+ORDER BY position_id
+SETTINGS index_granularity = 8192;
+
+---------Залить все данные из тестового набора данных один раз.
+INSERT INTO tmp.table5_106
+SELECT log_id, position_id, dt, item_id, status_id, src_office_id, dst_office_id
+		, delivery_dt, is_marketplace, as_id, dt_date
+FROM tmp.table3_106;
 
 
 
