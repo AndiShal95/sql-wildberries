@@ -45,7 +45,7 @@ SELECT uniq(position_id) as qty FROM tmp.table3_106;
 
 
 -- 03 Сколько заказов было Оформлено, Собрано, Подготовлено к отгрузке, Доставлено, Возврещено.
-SELECT countIf(status_id, status_id = 18) qty_18_status
+SELECT countIf(status_id, status_id = 18) qty_18_status -- по смыслу нужны уникальные заказы. нужна другая функция.
 	, countIf(status_id, status_id = 25) qty_25_status
 	, countIf(status_id, status_id = 28) qty_28_status
 	, countIf(status_id, status_id = 16) qty_16_status
@@ -56,11 +56,12 @@ FROM tmp.table3_106;
 -- 04 Вывести 100 заказов, с наибольшей историей.
 -- Добавить колонку массив со всеми товарами, которые были в заказе. Убрать дубли в массиве.
 SELECT position_id
-    , uniq(status_id)
+    , uniq(status_id) -- название нужно придумать.
+     -- для этой колонки есть функция groupArrayDistinct:
     , arraySort(arrayDistinct(groupArray(item_id))) arr_item -- массив уникальных товаров в заказе
 FROM tmp.table3_106
 GROUP BY position_id
-ORDER BY uniq(status_id) DESC
+ORDER BY uniq(status_id) DESC -- тут сортируем по названию колонки. ты ее уже посчтитал в блоке SELECT
 LIMIT 100;
 
 
@@ -68,12 +69,15 @@ LIMIT 100;
 -- у которого была хотя бы одна замена товара в заказе.
 -- За 7 дней из таблицы history.OrderDetails вывести детализацию по этому заказу.
 -- Упорядочить по дате.
+
+-- Это ты что то непонятное вывел) По идее хватает предыдущего запроса. Визуально глазами можно выбрать.
+-- В целом это можно удалить)
 SELECT position_id
     , uniq(status_id)
     , arraySort(arrayDistinct(groupArray(item_id))) arr_item -- массив уникальных товаров в заказе
 FROM tmp.table3_106
 WHERE status_id IN 
-( 
+( -- это не чо понятно зачем.
   SELECT status_id 
   FROM tmp.table3_106
   WHERE status_id = 8
@@ -123,6 +127,8 @@ FROM tmp.table3_106;
 
 
 -- 07 Найти заказы, которые встречаются в таблице более 1го раза.
+
+-- тут нужен запрос, который считает кол-во position_id в таблице. И вывести те заказы, у которых счетчик > 1.
 SELECT dt_date, dt, position_id, item_id
      , status_id
      , dictGet('dictionary.OrderStatus','status_name',status_id) status_name
