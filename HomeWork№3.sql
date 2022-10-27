@@ -72,10 +72,12 @@ LIMIT 100;
 -- Это ты что то непонятное вывел) По идее хватает предыдущего запроса. Визуально глазами можно выбрать.
 -- В целом это можно удалить)     заменил запрос(+)
 SELECT position_id
+	, uniq(item_id) change_item     --как описать минимум одну замену и какой у нее номер статуса(+)
     , uniq(status_id) max_history          
     , groupArrayDistinct(item_id) arr_item     
-FROM tmp.table3_106      --как описать минимум одну замену и какой у нее номер статуса?
-GROUP BY position_id
+FROM tmp.table3_106    
+GROUP BY position_id       
+HAVING change_item > 1
 ORDER BY max_history DESC
 LIMIT 1;
 
@@ -84,7 +86,7 @@ SELECT log_id, position_id, dt, item_id, status_id, src_office_id, dst_office_id
 		, delivery_dt, is_marketplace, as_id, dt_date
 FROM history.OrderDetails od 
 WHERE dt >= toStartOfDay(now()) - INTERVAL 7 DAY
-AND position_id = 154106458909
+AND position_id = 154130462418
 ORDER BY dt;
 
 
