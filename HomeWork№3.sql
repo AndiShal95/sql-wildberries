@@ -72,9 +72,9 @@ LIMIT 100;
 -- Это ты что то непонятное вывел) По идее хватает предыдущего запроса. Визуально глазами можно выбрать.
 -- В целом это можно удалить)     заменил запрос(+)
 SELECT position_id
-	, uniq(item_id) change_item     --как описать минимум одну замену и какой у нее номер статуса(+)
-    , uniq(status_id) max_history          
-    , groupArrayDistinct(item_id) arr_item     
+     , uniq(item_id) change_item     --как описать минимум одну замену и какой у нее номер статуса(+)
+     , uniq(status_id) max_history          
+     , groupArrayDistinct(item_id) arr_item     
 FROM tmp.table3_106    
 GROUP BY position_id       
 HAVING change_item > 1
