@@ -45,23 +45,22 @@ SELECT uniq(position_id) as qty FROM tmp.table3_106;
 
 
 -- 03 Сколько заказов было Оформлено, Собрано, Подготовлено к отгрузке, Доставлено, Возврещено.
-SELECT countIf(status_id, status_id = 18) qty_18_status -- по смыслу нужны уникальные заказы. нужна другая функция.
-	, countIf(status_id, status_id = 25) qty_25_status
-	, countIf(status_id, status_id = 28) qty_28_status
-	, countIf(status_id, status_id = 16) qty_16_status
-	, countIf(status_id, status_id = 8) qty_8_status
+SELECT uniqIf(position_id, status_id = 18) qty_18_status
+	, uniqIf(position_id, status_id = 25) qty_25_status       -- по смыслу нужны уникальные заказы. нужна другая функция. (+)
+	, uniqIf(position_id, status_id = 28) qty_28_status
+	, uniqIf(position_id, status_id = 16) qty_16_status
+	, uniqIf(position_id, status_id = 8) qty_8_status
 FROM tmp.table3_106;
 
 
 -- 04 Вывести 100 заказов, с наибольшей историей.
 -- Добавить колонку массив со всеми товарами, которые были в заказе. Убрать дубли в массиве.
 SELECT position_id
-    , uniq(status_id) -- название нужно придумать.
-     -- для этой колонки есть функция groupArrayDistinct:
-    , arraySort(arrayDistinct(groupArray(item_id))) arr_item -- массив уникальных товаров в заказе
+    , uniq(status_id) max_history         -- название нужно придумать(+)
+    , groupArrayDistinct(item_id) arr_item      -- для этой колонки есть функция groupArrayDistinct(+)
 FROM tmp.table3_106
 GROUP BY position_id
-ORDER BY uniq(status_id) DESC -- тут сортируем по названию колонки. ты ее уже посчтитал в блоке SELECT
+ORDER BY max_history DESC    -- тут сортируем по названию колонки. ты ее уже посчтитал в блоке SELECT(+)
 LIMIT 100;
 
 
@@ -71,19 +70,13 @@ LIMIT 100;
 -- Упорядочить по дате.
 
 -- Это ты что то непонятное вывел) По идее хватает предыдущего запроса. Визуально глазами можно выбрать.
--- В целом это можно удалить)
+-- В целом это можно удалить)     заменил запрос(+)
 SELECT position_id
-    , uniq(status_id)
-    , arraySort(arrayDistinct(groupArray(item_id))) arr_item -- массив уникальных товаров в заказе
-FROM tmp.table3_106
-WHERE status_id IN 
-( -- это не чо понятно зачем.
-  SELECT status_id 
-  FROM tmp.table3_106
-  WHERE status_id = 8
-)
+    , uniq(status_id) max_history          
+    , groupArrayDistinct(item_id) arr_item     
+FROM tmp.table3_106      --как описать минимум одну замену и какой у нее номер статуса?
 GROUP BY position_id
-ORDER BY uniq(status_id) DESC
+ORDER BY max_history DESC
 LIMIT 1;
 
 --Детализация по заказу из предыдущего запроса
@@ -91,7 +84,7 @@ SELECT log_id, position_id, dt, item_id, status_id, src_office_id, dst_office_id
 		, delivery_dt, is_marketplace, as_id, dt_date
 FROM history.OrderDetails od 
 WHERE dt >= toStartOfDay(now()) - INTERVAL 7 DAY
-AND position_id = 600703394373
+AND position_id = 154106458909
 ORDER BY dt;
 
 
@@ -128,14 +121,12 @@ FROM tmp.table3_106;
 
 -- 07 Найти заказы, которые встречаются в таблице более 1го раза.
 
--- тут нужен запрос, который считает кол-во position_id в таблице. И вывести те заказы, у которых счетчик > 1.
-SELECT dt_date, dt, position_id, item_id
-     , status_id
-     , dictGet('dictionary.OrderStatus','status_name',status_id) status_name
-     , src_office_id
-FROM tmp.table4_106 final
-ORDER BY dt
-LIMIT 100
+-- тут нужен запрос, который считает кол-во position_id в таблице. И вывести те заказы, у которых счетчик > 1. (+)
+SELECT position_id, COUNT() qty
+FROM tmp.table4_106
+GROUP BY position_id
+HAVING qty > 1
+ORDER BY qty DESC;
 
 
 -- 08 Вывести один из таких заказов.
@@ -144,7 +135,7 @@ SELECT dt_date, dt, position_id, item_id
      , dictGet('dictionary.OrderStatus','status_name',status_id) status_name
      , src_office_id
 FROM tmp.table4_106
-WHERE position_id = 600682328418
+WHERE position_id = 600768141645
 ORDER BY dt;
 
 
