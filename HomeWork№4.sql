@@ -72,7 +72,33 @@ LIMIT 100;
 -- 02
 -- Посчитать кол-во смен по каждому сотруднику.
 -- Начало смены считаем так. Вход, перед которым есть выход более 7ч.
+SELECT uniq(employee_id) tabel_number
+	 , office_id
+	 , minIf(dt, is_in = 0) outwork
+	 , maxIf(dt, is_in = 1) inter
+	 , datediff('hour', outwork, inter) diff_h
+	 , countIf(is_in, is_in = 1) work_shifts
+FROM history.turniket
+GROUP BY office_id
+HAVING diff_h > 7
+ORDER BY work_shifts
+LIMIT 100;
 
+
+-- 03
+-- Найти 100 сотрудников, у которых есть два или более входа подряд.
+SELECT uniq(employee_id) tabel_number   -- where is_in != 0 
+	 , toDate(dt) dt_date
+	 , uniq(dt) qty_in_out
+FROM history.turniket 
+WHERE dt >= now() - interval 30 day
+GROUP BY dt_date
+HAVING countIf(is_in, is_in=1) >= 2
+LIMIT 100
+	 
+	 
+-- 04
+-- Найти 100 сотрудников, у которых есть два или более выхода подряд.
 
 
 
