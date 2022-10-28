@@ -19,11 +19,7 @@ ENGINE = MergeTree
 ORDER BY position_id
 SETTINGS index_granularity = 8192;
 
-SELECT * FROM tmp.table3_106;
-SELECT * FROM history.OrderDetails
-LIMIT 50;
 
-	
 -- 01 Подготовить таблицу с тестовыми данными:
 -- Из таблицы history.OrderDetails по складу Хабаровск отобрать в таблицу
 -- tmp.table3_115 (использовать свой номер) по 200000 строк за каждые 5 последних суток.
