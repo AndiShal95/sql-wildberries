@@ -55,15 +55,23 @@ ORDER BY calend_day, interwork DESC;
 -- категория 1: отсутствовал от 7ч до 24ч
 -- категория 2: отсутствовал от 24ч до 7д
 -- категория 3: отсутствовал более 7д
-SELECT uniq(employee_id) person_num
-	 , 
-
-
-
-
-SELECT * FROM history.turniket
+SELECT employee_id
+	 , minIf(dt, is_in = 0) outwork
+	 , maxIf(dt, is_in = 1) inter
+	 , datediff('hour', outwork, inter) diff_h
+	 , CASE WHEN diff_h > 7 AND diff_h < 24 THEN 'absent from 7-24h' END 1st_category
+	 , CASE WHEN diff_h > 24 AND diff_h < 168 THEN 'absent from 24h-7d' END 2nd_category
+	 , CASE WHEN diff_h > 168 THEN 'absent more 7d' END 3rd_category
+FROM history.turniket
+GROUP BY employee_id
+HAVING diff_h > 7
+ORDER BY outwork DESC
 LIMIT 100;
 
+
+-- 02
+-- Посчитать кол-во смен по каждому сотруднику.
+-- Начало смены считаем так. Вход, перед которым есть выход более 7ч.
 
 
 
