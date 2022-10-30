@@ -87,18 +87,61 @@ LIMIT 100;
 
 -- 03
 -- Найти 100 сотрудников, у которых есть два или более входа подряд.
-SELECT uniq(employee_id) tabel_number   -- where is_in != 0 
-	 , toDate(dt) dt_date
-	 , uniq(dt) qty_in_out
-FROM history.turniket 
-WHERE dt >= now() - interval 30 day
-GROUP BY dt_date
-HAVING countIf(is_in, is_in=1) >= 2
-LIMIT 100
+SELECT employee_id, dt_in, dt_in2
+     , is_in
+FROM
+(
+    SELECT employee_id, min(dt) dt_in
+    FROM history.turniket
+    WHERE dt >= now() - interval 30 day
+        AND is_in = 1
+    GROUP BY employee_id
+) l
+asof JOIN
+(
+    SELECT employee_id, dt dt_in2, is_in
+    FROM history.turniket
+    WHERE dt >= now() - interval 30 day
+        AND is_in = 1
+) r
+ON l.employee_id = r.employee_id AND l.dt_in < r.dt_in2;
 	 
 	 
 -- 04
 -- Найти 100 сотрудников, у которых есть два или более выхода подряд.
+SELECT employee_id, dt_out, dt_out2
+     , is_in
+FROM
+(
+    SELECT employee_id, min(dt) dt_out
+    FROM history.turniket
+    WHERE dt >= now() - interval 30 day
+        AND is_in = 0
+    GROUP BY employee_id
+) l
+asof JOIN
+(
+    SELECT employee_id, dt dt_out2, is_in
+    FROM history.turniket
+    WHERE dt >= now() - interval 30 day
+        AND is_in = 0
+) r
+ON l.employee_id = r.employee_id AND l.dt_out < r.dt_out2
+LIMIT 100;
+
+
+-- 05
+-- Показать 100 сотрудников, которые до сих пор на работе.
+-- Вывести в отдельную колонку сколько времени прошло от начала их смены.
+-- У кого с начала смены прошло более 15 часов, отметить цифрой в отдельной колонке is_long_work. 1 - Да, 0 - Нет.
+-- Таблица turniket не пополняется, поэтому за текущее время брать максимальную дату по каждому офису, которая есть в таблице.
+-- Т.е. более 15 часов должно быть от этой даты: office_id, max(dt) from turniket group by office_id.
+
+
+
+
+
+
 
 
 
