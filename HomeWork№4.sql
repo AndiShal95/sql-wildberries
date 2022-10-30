@@ -136,10 +136,37 @@ LIMIT 100;
 -- У кого с начала смены прошло более 15 часов, отметить цифрой в отдельной колонке is_long_work. 1 - Да, 0 - Нет.
 -- Таблица turniket не пополняется, поэтому за текущее время брать максимальную дату по каждому офису, которая есть в таблице.
 -- Т.е. более 15 часов должно быть от этой даты: office_id, max(dt) from turniket group by office_id.
+SELECT employee_id
+	 , argMax(office_id, dt) office_id
+	 , minIf(dt, is_in = 1) start_work
+	 , max(dt) dt_last
+	 , date_diff('hour', start_work, dt_last) working_hours
+	 , CASE WHEN working_hours > 15 THEN 1 WHEN working_hours < 15 THEN 0
+	   END is_long_work
+FROM history.turniket 
+WHERE dt >= now() - INTERVAL 10 DAY
+GROUP BY employee_id
+HAVING is_in = 1
+ORDER BY dt_last DESC, working_hours DESC
+LIMIT 100;
 
 
+-- 06
+-- Посчитать среднее время между концом и началом смены по каждому офису и за каждый день.
+SELECT office_id
+	 , toDate(dt) every_day
+	 , minIf(dt, is_in = 0) outwork
+	 , maxIf(dt, is_in = 1) inter
+	 , countIf(is_in, is_in = 1) work_shifts
+	 , ((outwork - inter)/work_shifts) avg_work_shift   -- не понял как это делать
+FROM history.turniket
+WHERE dt >= now() - INTERVAL 30 DAY
+GROUP BY office_id, every_day
+LIMIT 100;
 
 
+-- 07
+-- Посчитать среднее время длительности смены по каждому офису и за каждый день.
 
 
 
