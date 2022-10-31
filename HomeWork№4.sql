@@ -4,8 +4,8 @@
 SELECT COUNT(*) FROM history.turniket;
 
 -- 02 Сколько записей на каждый день.
-SELECT COUNT(*) all_record
-	   , toDate(dt) calend_day
+SELECT COUNT(*) all_record -- елси это кол-во, то делаем префикс qty_. получается qty_record. поправь везде)
+	   , toDate(dt) calend_day -- для даты используем dt_date. для даты-время dt. поправь везде)
 FROM history.turniket
 GROUP BY calend_day
 ORDER BY calend_day
@@ -55,10 +55,13 @@ ORDER BY calend_day, interwork DESC;
 -- категория 1: отсутствовал от 7ч до 24ч
 -- категория 2: отсутствовал от 24ч до 7д
 -- категория 3: отсутствовал более 7д
+
+-- в этой задаче нужно использовать asof join
 SELECT employee_id
 	 , minIf(dt, is_in = 0) outwork
 	 , maxIf(dt, is_in = 1) inter
 	 , datediff('hour', outwork, inter) diff_h
+     -- все 3 строки ниже переделай в multiIf()
 	 , CASE WHEN diff_h > 7 AND diff_h < 24 THEN 'absent from 7-24h' END 1st_category
 	 , CASE WHEN diff_h > 24 AND diff_h < 168 THEN 'absent from 24h-7d' END 2nd_category
 	 , CASE WHEN diff_h > 168 THEN 'absent more 7d' END 3rd_category
@@ -72,6 +75,9 @@ LIMIT 100;
 -- 02
 -- Посчитать кол-во смен по каждому сотруднику.
 -- Начало смены считаем так. Вход, перед которым есть выход более 7ч.
+
+-- в этой задаче нужно использовать asof join. пример был на лекции
+
 SELECT uniq(employee_id) tabel_number
 	 , office_id
 	 , minIf(dt, is_in = 0) outwork
@@ -91,11 +97,13 @@ SELECT employee_id, dt_in, dt_in2
      , is_in
 FROM
 (
-    SELECT employee_id, min(dt) dt_in
+    SELECT employee_id
+         , min(dt) dt_in -- просто dt dt_in
+         , is_in
     FROM history.turniket
     WHERE dt >= now() - interval 30 day
-        AND is_in = 1
-    GROUP BY employee_id
+        AND is_in = 1 -- это условие нужно перенести вниз
+    -- GROUP BY employee_id -- не нужно
 ) l
 asof JOIN
 (
@@ -105,10 +113,13 @@ asof JOIN
         AND is_in = 1
 ) r
 ON l.employee_id = r.employee_id AND l.dt_in < r.dt_in2;
-	 
+-- where сюда
 	 
 -- 04
 -- Найти 100 сотрудников, у которых есть два или более выхода подряд.
+
+-- эту задачу тоже нужно переделать, как и предыдущую
+
 SELECT employee_id, dt_out, dt_out2
      , is_in
 FROM
@@ -138,7 +149,7 @@ LIMIT 100;
 -- Т.е. более 15 часов должно быть от этой даты: office_id, max(dt) from turniket group by office_id.
 SELECT employee_id
 	 , argMax(office_id, dt) office_id
-	 , minIf(dt, is_in = 1) start_work
+	 , minIf(dt, is_in = 1) start_work -- получается у некоторых сотрудников будет начало 10 дней назад.
 	 , max(dt) dt_last
 	 , date_diff('hour', start_work, dt_last) working_hours
 	 , CASE WHEN working_hours > 15 THEN 1 WHEN working_hours < 15 THEN 0
@@ -169,6 +180,9 @@ LIMIT 100;
 -- Посчитать среднее время длительности смены по каждому офису и за каждый день.
 
 
-
+-- В целом на уроке разбирали как считать начало смены.
+-- Нам нужен вход перед которым есть выход 7 или более часов назад.
+-- Т.е. сначала был выход. Потом прошло более 7ми часов. И после этого был вход.
+-- В большинстве задач нужно использовать asof join для поиска начала смены.
 
 
