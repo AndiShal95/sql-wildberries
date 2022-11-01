@@ -4,30 +4,31 @@
 SELECT COUNT(*) FROM history.turniket;
 
 -- 02 Сколько записей на каждый день.
-SELECT COUNT(*) all_record -- елси это кол-во, то делаем префикс qty_. получается qty_record. поправь везде)
-	   , toDate(dt) calend_day -- для даты используем dt_date. для даты-время dt. поправь везде)
+SELECT COUNT(*) qty_record -- елси это кол-во, то делаем префикс qty_. получается qty_record. поправь везде) (+)
+	   , toDate(dt) dt_date -- для даты используем dt_date. для даты-время dt. поправь везде)   (+)
 FROM history.turniket
-GROUP BY calend_day
-ORDER BY calend_day
+GROUP BY dt_date
+ORDER BY dt_date
 
 -- 03 Сколько записей на каждый день по каждому офису.
-SELECT COUNT(*) all_record
+SELECT COUNT(*) qty_record
 	   , office_id
-	   , toDate(dt) calend_day
+	   , toDate(dt) dt_date
 FROM history.turniket
-GROUP BY office_id, calend_day
-ORDER BY calend_day
+GROUP BY office_id, dt_date
+ORDER BY dt_date, office_id DESC;
 
 -- 04 Сколько уникальных сотрудников в таблице.
 SELECT uniq(employee_id) 
-FROM history.turniket
+FROM history.turniket;
 
 -- 05 Сколько уникальных сотрудников на каждый день.
-SELECT uniq(employee_id)
-	 , toDate(dt) calend_day
+SELECT uniq(employee_id) 
+	 , toDate(dt) dt_date
 FROM history.turniket
-GROUP BY calend_day
+GROUP BY dt_date;
 	 
+
 -- 06
 -- Сколько уникальных сотрудников на каждый день по каждому офису.
 -- Кол-во входов.
@@ -36,14 +37,14 @@ GROUP BY calend_day
 -- Среднее кол-во выходов на каждого сотрудника.
 SELECT uniq(employee_id) person_num
 	 , office_id
-	 , toDate(dt) calend_day
-	 , countIf(is_in, is_in=1) interwork
-	 , countIf(is_in, is_in=0) outwork
+	 , toDate(dt) dt_date
+	 , countIf(is_in, is_in = 1) interwork
+	 , countIf(is_in, is_in = 0) outwork
 	 , round(count(is_in = 1)/person_num, 0) avg_in_emp
 	 , round(count(is_in = 0)/person_num, 0) avg_out_emp
 FROM history.turniket
-GROUP BY calend_day, office_id
-ORDER BY calend_day, interwork DESC;
+GROUP BY dt_date, office_id
+ORDER BY dt_date, interwork DESC;
 
 
 -- Часть 2. Запросы к таблице history.turniket
