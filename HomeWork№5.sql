@@ -11,9 +11,11 @@ SELECT arrayMap(x -> (x + 2), [1, 2, 3]) as arr,
 -- 02
 -- Из подобного массива получить новый массив: сколько секунд прошло между датами соседних элементов.
 select position_id
-    , arraySort(groupArray(dt)) arr
+    , arrayFilter(x -> x.1 != 0, arr_src_second) arr_new
+    , arrayMap(x -> (date_diff('second', arr[x - 1].1, arr[x].1), arr[x], (toDateTime(0),0)), arrayEnumerate(arr)) arr_src_second  
+    , arraySort(groupArray((dt, status_id))) arr
 from tmp.table_05
-group by position_id
+group by position_id;	  
 
 
 -- 03
