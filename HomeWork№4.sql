@@ -57,20 +57,33 @@ ORDER BY dt_date, interwork DESC;
 -- категория 2: отсутствовал от 24ч до 7д
 -- категория 3: отсутствовал более 7д
 
--- в этой задаче нужно использовать asof join
-SELECT employee_id
-	 , minIf(dt, is_in = 0) outwork
-	 , maxIf(dt, is_in = 1) inter
-	 , datediff('hour', outwork, inter) diff_h
-     -- все 3 строки ниже переделай в multiIf()
-	 , CASE WHEN diff_h > 7 AND diff_h < 24 THEN 'absent from 7-24h' END 1st_category
-	 , CASE WHEN diff_h > 24 AND diff_h < 168 THEN 'absent from 24h-7d' END 2nd_category
-	 , CASE WHEN diff_h > 168 THEN 'absent more 7d' END 3rd_category
-FROM history.turniket
-GROUP BY employee_id
-HAVING diff_h > 7
-ORDER BY outwork DESC
-LIMIT 100;
+-- в этой задаче нужно использовать asof join (+)
+select employee_id
+     , dt_in
+     , dt_out
+     , date_diff('hour', dt_in, dt_out) diff_h
+     , multiIf(diff_h > 7 AND diff_h <= 24, '1st_category'
+       , diff_h > 24 AND diff_h <= 168, '2nd_category' 
+     	  , diff_h > 168, '3rd_category', 'Null') out_category
+from
+(
+    select employee_id, dt dt_in
+    from history.turniket
+    where dt >= now() - interval 30 day
+        and is_in = 1
+    group by employee_id, dt
+) l
+asof join
+(
+    select employee_id, dt dt_out
+    from history.turniket
+    where dt >= now() - interval 30 day
+        and is_in = 0
+) r
+on l.employee_id = r.employee_id and l.dt_in < r.dt_out
+WHERE diff_h > 7
+ORDER BY out_category
+LIMIT 100
 
 
 -- 02
