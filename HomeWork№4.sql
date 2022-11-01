@@ -61,17 +61,16 @@ ORDER BY dt_date, interwork DESC;
 select employee_id
      , dt_in
      , dt_out
-     , date_diff('hour', dt_in, dt_out) diff_h
+     , date_diff('hour', dt_in, dt_out) diff_h -- нижний комент поправить. потом в этой строке поменять порядок дат в date_diff
      , multiIf(diff_h > 7 AND diff_h <= 24, '1st_category'
-       , diff_h > 24 AND diff_h <= 168, '2nd_category' 
-     	  , diff_h > 168, '3rd_category', 'Null') out_category
+             , diff_h > 24 AND diff_h <= 168, '2nd_category', '3rd_category') out_category
 from
 (
     select employee_id, dt dt_in
     from history.turniket
     where dt >= now() - interval 30 day
         and is_in = 1
-    group by employee_id, dt
+    group by employee_id, dt -- группировка не нужна
 ) l
 asof join
 (
@@ -80,7 +79,7 @@ asof join
     where dt >= now() - interval 30 day
         and is_in = 0
 ) r
-on l.employee_id = r.employee_id and l.dt_in < r.dt_out
+on l.employee_id = r.employee_id and l.dt_in < r.dt_out -- Зашли после отсутствия более 7 часов. Т.е. dt_in < dt_out
 WHERE diff_h > 7
 ORDER BY out_category
 LIMIT 100
